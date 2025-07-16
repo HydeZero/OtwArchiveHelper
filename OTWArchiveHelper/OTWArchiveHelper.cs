@@ -106,6 +106,7 @@ public class OtwArchiveHelper
                 Console.WriteLine("trying to get title");
                 foreach (var work in workListNode.ChildNodes)
                 {
+                    if (work.Name != "li") continue; // skip non-work nodes
                     string title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a")?.InnerText.Trim();
                     Console.WriteLine($"Checking work title: {title}");
                     if (string.IsNullOrEmpty(title))
@@ -125,10 +126,7 @@ public class OtwArchiveHelper
                 workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@class='tag home profile']/div[@class='work listbox group']/ul[@class='index group']"); // non-canon tag
                 foreach (var work in workListNode.ChildNodes)
                 {
-                    if (work.Name == "#text")
-                    {
-                        continue;
-                    }
+                    if (work.Name != "li") continue;
                     Console.WriteLine("Checking non-canonical work title");
                     string title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
                     if (string.IsNullOrEmpty(title))
@@ -167,9 +165,17 @@ public class OtwArchiveHelper
             List<string> title = new List<string>();
             title.Add(work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a")?.InnerText.Trim() ?? "No Title Provided"); // works can have no title, so if the title tag isn't found, assume "No Title Provided"
             List<string> authors = new List<string>();
-            foreach (var author in work.SelectNodes(".//div[@class='header module']/h4[@class='heading']/a[@rel='author']"))
+            try
             {
-                authors.Add(author.InnerText.Trim());
+                foreach (var author in work.SelectNodes(".//div[@class='header module']/h4[@class='heading']/a[@rel='author']"))
+                {
+                    authors.Add(author.InnerText.Trim());
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                // assume author is anonymous
+                authors.Add("Anonymous");
             }
             List<string> workId = new List<string>();
             workId.Add(work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").GetAttributeValue("href", "/404").Split('/').Last()); // get the last part of the href, which is the work ID
@@ -266,9 +272,17 @@ public class OtwArchiveHelper
             List<string> title = new List<string>();
             title.Add(work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a")?.InnerText.Trim() ?? "No Title Provided"); // works can have no title, so if the title tag isn't found, assume "No Title Provided"
             List<string> authors = new List<string>();
-            foreach (var author in work.SelectNodes(".//div[@class='header module']/h4[@class='heading']/a[@rel='author']"))
+            try
             {
-                authors.Add(author.InnerText.Trim());
+                foreach (var author in work.SelectNodes(".//div[@class='header module']/h4[@class='heading']/a[@rel='author']"))
+                {
+                    authors.Add(author.InnerText.Trim());
+                }
+            }
+            catch (NullReferenceException)
+            {
+                // assume author is anonymous
+                authors.Add("Anonymous");
             }
             List<string> workId = new List<string>();
             workId.Add(work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").GetAttributeValue("href", "/404").Split('/').Last()); // get the last part of the href, which is the work ID
@@ -416,13 +430,13 @@ public class OtwArchiveHelper
         return result;
     }
 
-    private async Task<Dictionary<string, string>> GetWorkPageBackend(string workId)
+    private async Task<Dictionary<string, string>> GetWorkPageBackend(string workId, string chapterId="")
     {
         if (string.IsNullOrEmpty(workId))
         {
             ArgumentException ex = new ArgumentException("Work ID cannot be null or empty.");
         }
-        string url = $"{ArchivePath}works/{workId}"; // construct the URL for the work page
+        string url = $"{ArchivePath}works/{workId}/chapters/{chapterId}"; // construct the URL for the work page
         
         Task<HttpResponseMessage> workPageDownload = _archiveClient.GetAsync(url);
         
@@ -484,8 +498,19 @@ public class OtwArchiveHelper
         {
             throw new Exception("No Content Found. The work may not exist or the ID is incorrect.");
         }
-        
+        string nextChapter = ""; // initialize next chapter variable
+
+        try
+        {
+            nextChapter = workPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@id='feedback']/ul[@class='actions']/li/a[text()='Next Chapter →']").GetDataAttribute("href").Value.Split("/")[-1];
+        }
+        catch (Exception)
+        {
+            nextChapter = "-1"; // if an error occurs, assume "-1" (no next chapter)
+        }
+
         Dictionary<string, string> work = new Dictionary<string, string>();
+
         
         work = new Dictionary<string, string>()
         {
@@ -493,7 +518,8 @@ public class OtwArchiveHelper
             { "authors", authors },
             { "summary", summary },
             { "notes", notes },
-            { "text", text }
+            { "text", text },
+            { "nextChapter", nextChapter }
         };
 
         return work;
@@ -515,16 +541,16 @@ public class OtwArchiveHelper
     /// Gets a work page as a Markdown string.
     /// </summary>
     /// <param name="workId">The id of the work to grab.</param>
-    /// <returns>A string containing work contents in markdown.</returns>
+    /// <returns>A list containing work contents in markdown at index 0, and the next chapter id in index 1 (chapter id will be -1 if there is no next chapter).</returns>
     /// <exception cref="ArgumentException">Work ID can't be null or empty.</exception>
-    public async Task<string> GetWorkPageMarkdown(string workId)
+    public async Task<List<string>> GetWorkPageMarkdown(string workId, string chapterId = "")
     {
         if (string.IsNullOrEmpty(workId))
         {
             throw new ArgumentException("Work ID cannot be null or empty.");
         }
         
-        var work = await GetWorkPageBackend(workId);
+        var work = await GetWorkPageBackend(workId, chapterId);
         
         work["text"] = ConvertHtmlToMarkdown(work["text"]); // convert HTML to Markdown
         
@@ -534,7 +560,13 @@ public class OtwArchiveHelper
                           $"## Notes\n{work["notes"]}\n\n" +
                           $"{work["text"]}"; // this is the text of the work, which is in Markdown format
         
-        return markdown;
+        var result = new List<string>
+        {
+            markdown, // add the markdown result to the list
+            work["nextChapter"] // add the next chapter id to the list, if it exists
+        };
+
+        return result;
     }
     
     /// <summary>
@@ -543,7 +575,7 @@ public class OtwArchiveHelper
     /// <param name="workId">The id of the work to grab.</param>
     /// <returns>A string containing work contents in HTML.</returns>
     /// <exception cref="ArgumentException">Work ID can't be null or empty.</exception>
-    public async Task<string> GetWorkPageHtml(string workId)
+    public async Task<List<string>> GetWorkPageHtml(string workId, string chapterId="")
     {
         // construct a basic html page with the work content.
         if (string.IsNullOrEmpty(workId))
@@ -551,8 +583,8 @@ public class OtwArchiveHelper
             throw new ArgumentException("Work ID cannot be null or empty.");
         }
         
-        var work = await GetWorkPageBackend(workId);
-        
+        var work = await GetWorkPageBackend(workId, chapterId);
+
         string htmlResult = $"<html>\n" +
                             $"<head>\n" +
                             $"<title>{work["title"]}</title>\n" +
@@ -568,6 +600,12 @@ public class OtwArchiveHelper
                             $"{work["text"]}\n" + // this is the text of the work, which is in html format already. no modification is needed.
                             $"</body>\n" +
                             $"</html>";
-        return htmlResult; // return the html result
+        
+        List<string> result = new List<string>();
+
+        result.Add(htmlResult); // add the html result to the list
+        result.Add(work["nextChapter"]); // add the next chapter id to the list, if it exists
+
+        return result; // return the html result
     }
 }

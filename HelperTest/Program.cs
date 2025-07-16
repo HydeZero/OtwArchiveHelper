@@ -51,11 +51,26 @@ while (true)
             int.TryParse(request, out int workIndex);
             if ((workIndex >= 0) && (workIndex < works.Count))
             {
-                var work = works[workIndex];
-                Console.WriteLine($"Reading work: {work["title"]} by {work["authors"]}");
-                var workContent = await archiveHelper.GetWorkPageMarkdown(work["workId"]);
-                Console.WriteLine("Work content received. Displaying...");
-                Console.WriteLine(workContent);
+                while (true)
+                {
+                    var work = works[workIndex];
+                    Console.WriteLine($"Reading work: {work["title"]} by {work["authors"]}");
+                    var workContent = await archiveHelper.GetWorkPageMarkdown(work["workId"]);
+                    Console.WriteLine("Work content received. Displaying...");
+                    Console.WriteLine(workContent[0]);
+                    if (workContent[1] != "-1")
+                    {
+                        Console.WriteLine("Go to next chapter? (y/n)");
+                        var nextChapterResponse = Console.ReadLine();
+                        if (nextChapterResponse?.ToLower() == "y")
+                        {
+                            var nextChapterContent = await archiveHelper.GetWorkPageMarkdown(work["workId"], workContent[1]);
+                            Console.WriteLine("Next chapter content received. Displaying...");
+                            Console.WriteLine(nextChapterContent[0]);
+                        }
+                    }
+                }
+                
             }
         }
         catch (IndexOutOfRangeException)

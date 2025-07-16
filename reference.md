@@ -138,8 +138,8 @@ workHtml = await workPageHtml; // call when the workPageHtml is needed for displ
 Gets the work page as an HTML string. This is useful for displaying the work in a web view or for further processing.
 
 Parameters:
-- workId [string]: The ID of the work to retrieve. This is the number in the URL of the work page. You can pass the `workId` output from `GetTagPageList` (index 0) or `GetTagPageString` to this function to get the work page.
-
+- `workId` [string]: The ID of the work to retrieve. This is the number in the URL of the work page. You can pass the `workId` output from `GetTagPageList` (index 0) or `GetTagPageString` to this function to get the work page.
+- `chapterId` [string]: The ID of the chapter to retrieve. Optional, defaults to chapter 1 if not provided.
 Returns:
 A string containing HTML of the work page. The HTML will be as shown:
 ```html
