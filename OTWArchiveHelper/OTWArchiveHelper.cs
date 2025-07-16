@@ -193,7 +193,7 @@ public class OtwArchiveHelper
         }
         catch (Exception ex)
         {
-            return new List<Dictionary<string, List<string>>>();
+            throw new Exception($"An error occurred while retrieving the canonical tag page: {ex.Message}", ex);
         }
     }
     
@@ -322,7 +322,7 @@ public class OtwArchiveHelper
         return work;
     }
     
-    private async Task<string> _ConvertHtmlToMarkdown(string htmlContent)
+    private static string ConvertHtmlToMarkdown(string htmlContent)
     {
         if (string.IsNullOrEmpty(htmlContent))
         {
@@ -349,7 +349,7 @@ public class OtwArchiveHelper
         
         var work = await GetWorkPageBackend(workId);
         
-        work["text"] = await _ConvertHtmlToMarkdown(work["text"]); // convert HTML to Markdown
+        work["text"] = ConvertHtmlToMarkdown(work["text"]); // convert HTML to Markdown
         
         string markdown = $"# {work["title"]}\n\n" +
                           $"**Authors:** {work["authors"]}\n\n" +
