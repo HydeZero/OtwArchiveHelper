@@ -23,7 +23,7 @@ This means that although you CAN scrape content, it has to be 100% non-commercia
 * Non-Canonical tags crash the program
 
 ## Installation/Usage
-A NuGet Package will be avaliable soon.
+Install the NuGet package `OTWArchiveHelper` in your project. This library is built for .NET 9.0 and later, and is planned to be upgraded to .NET 10.0 LTS when it is released.
 
 See documentation in [reference.md](./reference.md)
 

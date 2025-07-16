@@ -1,6 +1,6 @@
 ﻿namespace OTWArchiveHelper; // change this line to your namespace/namespace location for manual installation
 using HtmlAgilityPack;
-
+using System.Text;
 
 public class OtwArchiveHelper
 {
@@ -29,6 +29,8 @@ public class OtwArchiveHelper
         ArchivePath = archivePath;
         _archiveClient.BaseAddress = new Uri(ArchivePath);
         _archiveClient.Timeout = TimeSpan.FromSeconds(timeout);
+        _archiveClient.DefaultRequestVersion = new Version(2, 0); // who knew this one line speeds up the thing by a lot
+        _archiveClient.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
         bool useragentTest = _archiveClient.DefaultRequestHeaders.UserAgent.TryParseAdd($"{appName}/{appVersion}"); // set user agent to identify the app
         if (useragentTest == false)
         {
@@ -51,7 +53,7 @@ public class OtwArchiveHelper
         return testResults; // if we get a response, the connection is successful
     }
     
-    private async Task<List<Dictionary<string,List<string>>>> _GetFandomPageBackend(string fandomName, int page) // async list of dictionaries with work information
+    private async Task<List<Dictionary<string,List<string>>>> GetFandomPageBackend(string fandomName, int page) // async list of dictionaries with work information
     {
         if (string.IsNullOrEmpty(fandomName))
         {
@@ -187,7 +189,7 @@ public class OtwArchiveHelper
                 
         try
         {
-            return await _GetFandomPageBackend(fandomName, page);
+            return await GetFandomPageBackend(fandomName, page);
         }
         catch (Exception ex)
         {
@@ -210,7 +212,7 @@ public class OtwArchiveHelper
         }
         
                 
-        var preResult = await _GetFandomPageBackend(fandomName, page);
+        var preResult = await GetFandomPageBackend(fandomName, page);
         
         var result = new List<Dictionary<string, string>>();
         
@@ -237,7 +239,7 @@ public class OtwArchiveHelper
         return result;
     }
 
-    private async Task<Dictionary<string, string>> _GetWorkPageBackend(string workId)
+    private async Task<Dictionary<string, string>> GetWorkPageBackend(string workId)
     {
         if (string.IsNullOrEmpty(workId))
         {
@@ -267,7 +269,7 @@ public class OtwArchiveHelper
         string notes = "";
         string text = "";
         
-        title = workContent.SelectSingleNode(".//div[@class='preface group'/h2[@class='title heading']").InnerText.Trim();
+        title = workContent.SelectSingleNode(".//div[@class='preface group']/h2[@class='title heading']").InnerText.Trim();
         try
         {
             authors = string.Join(", ",
@@ -345,7 +347,7 @@ public class OtwArchiveHelper
             throw new ArgumentException("Work ID cannot be null or empty.");
         }
         
-        var work = await _GetWorkPageBackend(workId);
+        var work = await GetWorkPageBackend(workId);
         
         work["text"] = await _ConvertHtmlToMarkdown(work["text"]); // convert HTML to Markdown
         
@@ -372,7 +374,7 @@ public class OtwArchiveHelper
             throw new ArgumentException("Work ID cannot be null or empty.");
         }
         
-        var work = await _GetWorkPageBackend(workId);
+        var work = await GetWorkPageBackend(workId);
         
         string htmlResult = $"<html>\n" +
                             $"<head>\n" +
@@ -391,5 +393,4 @@ public class OtwArchiveHelper
                             $"</html>";
         return htmlResult; // return the html result
     }
-    
 }
