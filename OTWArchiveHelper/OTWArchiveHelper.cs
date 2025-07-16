@@ -136,9 +136,9 @@ public class OtwArchiveHelper
             var tagNodes = work.SelectNodes(".//ul[@class='tags commas']/li[@class='freeforms']/a[@class='tag']");
             if (tagNodes != null)
             {
-                foreach (var tag in tagNodes)
+                foreach (var tagNode in tagNodes)
                 {
-                    tags.Add(tag.InnerText.Trim()); // works can have no- yeah you get the idea by now
+                    tags.Add(tagNode.InnerText.Trim()); // works can have no- yeah you get the idea by now
                 }
             }
             else
