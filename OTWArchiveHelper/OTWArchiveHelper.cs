@@ -98,7 +98,7 @@ public class OtwArchiveHelper
             workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@class='tag home profile']/div[@class='work listbox group']/ul[@class='index group']"); // non-canon tag
             foreach (var work in workListNode.ChildNodes)
             {
-                var title = work.SelectSingleNode(".//div[@class='header module'/h4[@class='heading']/a").InnerText.Trim();
+                var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
                 if (string.IsNullOrEmpty(title))
                 {
                     throw new Exception("This tag is neither canonical nor non-canonical.");
