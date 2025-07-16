@@ -91,7 +91,7 @@ public class OtwArchiveHelper
                 }
                 break; // we only need to check the first work to see if the tag is canonical or not
             }
-            Result = await GetCanonTagPageBackend(tag, page); // get the canonical tag page
+            Result = GetCanonTagPageBackend(tagPage); // get the canonical tag page
         }
         catch (Exception)
         {
@@ -105,35 +105,15 @@ public class OtwArchiveHelper
                 }
                 break;
             }
-            Result = await GetNonCanonTagPageBackend(tag, page); // get the non-canonical tag page
+            Result = GetNonCanonTagPageBackend(tagPage); // get the non-canonical tag page
         }
 
         return Result; // return the result list of dictionaries with work information
     }
     
-    private async Task<List<Dictionary<string,List<string>>>> GetCanonTagPageBackend(string tag, int page) // async list of dictionaries with work information
+    private static List<Dictionary<string,List<string>>> GetCanonTagPageBackend(HtmlDocument tagPage) // async list of dictionaries with work information
     {
-        if (string.IsNullOrEmpty(tag))
-        {
-            throw new ArgumentException("Fandom name cannot be null or empty.");
-        }
-        
-        string url = $"{ArchivePath}tags/{Uri.EscapeDataString(tag)}/works?page={page}"; // construct the URL for the fandom page
-        Task<HttpResponseMessage> fandomPageDownload = _archiveClient.GetAsync(url);
-
-        HttpResponseMessage response = await fandomPageDownload;
-        
-                
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new Exception($"Failed to retrieve fandom page: {response.ReasonPhrase}");
-        }
-        
-        var fandomPage = new HtmlDocument();
-        
-        fandomPage.LoadHtml(await response.Content.ReadAsStringAsync());
-        
-        var workListNode = fandomPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/ol[@class='work index group']");
+        var workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/ol[@class='work index group']");
 
         var result = new List<Dictionary<string, List<string>>>();
         
@@ -230,8 +210,10 @@ public class OtwArchiveHelper
         return result;
     }
 
-    private async Task<List<Dictionary<string, List<string>>>> GetNonCanonTagPageBackend(string tag, int page) // async list of dictionaries with work information
+    private static List<Dictionary<string, List<string>>> GetNonCanonTagPageBackend(HtmlDocument tagPage) // async list of dictionaries with work information
     {
+        var workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/ol[@class='work index group']");
+
         var result = new List<Dictionary<string, List<string>>>();
 
         foreach (var work in workListNode.ChildNodes)
@@ -328,13 +310,13 @@ public class OtwArchiveHelper
     }
 
     /// <summary>
-    /// Gets the canonical tag page page as a list of dictionaries with List(string) key values. Good for additional processing/tag searches.
+    /// Gets the tag page page as a list of dictionaries with List(string) key values. Good for additional processing/tag searches.
     /// </summary>
     /// <param name="tag">The name of the tag to search through.</param>
     /// <param name="page">The page number to search through.</param>
     /// <returns>A dictionary of main tags/info of fanworks with the key values as lists.</returns>
     /// <exception cref="ArgumentException">Tag name cannot be null or empty.</exception>
-    public async Task<List<Dictionary<string, List<string>>>> GetCanonTagPageList(string tag, int page = 1)
+    public async Task<List<Dictionary<string, List<string>>>> GetTagPageList(string tag, int page = 1)
     {
         if (string.IsNullOrEmpty(tag))
         {
@@ -344,7 +326,7 @@ public class OtwArchiveHelper
                 
         try
         {
-            return await GetCanonTagPageBackend(tag, page);
+            return await GetTagBackend(tag, page);
         }
         catch (Exception ex)
         {
@@ -353,13 +335,13 @@ public class OtwArchiveHelper
     }
     
     /// <summary>
-    /// Gets the canonical tag page as a list of dictionaries with string key values. Good for just displaying the info
+    /// Gets the tag page as a list of dictionaries with string key values. Good for just displaying the info
     /// </summary>
     /// <param name="tag">The name of the tag to search through.</param>
     /// <param name="page">The page number to search through.</param>
     /// <returns>A dictionary of main tags/info of fanworks with the key values as lists.</returns>
     /// <exception cref="ArgumentException">Tag name cannot be null or empty.</exception>
-    public async Task<List<Dictionary<string, string>>> GetCanonTagPageString(string tag, int page = 1)
+    public async Task<List<Dictionary<string, string>>> GetTagPageString(string tag, int page = 1)
     {
         if (string.IsNullOrEmpty(tag))
         {
@@ -367,7 +349,7 @@ public class OtwArchiveHelper
         }
         
                 
-        var preResult = await GetCanonTagPageBackend(tag, page);
+        var preResult = await GetTagBackend(tag, page);
         
         var result = new List<Dictionary<string, string>>();
         
