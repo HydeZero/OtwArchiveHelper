@@ -5,7 +5,7 @@
 >[!CAUTION]
 > DO NOT USE THIS PROJECT TO BREAK THE TERMS OF SERVICE OF ANY WEBSITES. By using this library, you agree that you understand the risks and that the developer isn't liable for any consequences that result.
 
-This project is just a helper to allow other C# programs to grab content from websites using the [otwarchive](https://github.com/otwcode/otwarchive) as a backend. This project relies on scraping. You can use this to:
+This project is just a helper to allow other C# programs to grab content from websites using the [otwarchive](https://github.com/otwcode/otwarchive) as a backend. This project relies on scraping, but absolutely NO DATA IS STORED IN THE LIBRARY ITSELF. The library only provides the data. You can use this to:
 
 * Make an Avalonia UI app to read such content
 * Make a terminal program
@@ -17,7 +17,7 @@ It depends on the site where it's hosted. Please review the ToS of the website b
 For AO3, the Terms of Service, specifically I.F. ("What you can't do"), state that you are NOT allowed:
 > "...to conduct any commercial activity, whether for direct or indirect commercial advantage, including (without limitation) making available any advertising, spam, or other solicitation, or scraping Content in order to commercialize it;..."
 
-This means that although you CAN scrape content, it has to be 100% non-commercial. As a result, it is HIGHLY advised to avoid putting ads in tools that use this project.
+This means that although you CAN scrape content, it has to be 100% non-commercial. As a result, don't put advertisements on apps using this, as it could be considered commercialization.
 
 ## Known Issues
 * Non-Canonical tags crash the program
