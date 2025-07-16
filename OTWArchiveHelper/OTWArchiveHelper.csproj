@@ -8,12 +8,12 @@
         <RootNamespace>OTWArchiveHelper</RootNamespace>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<VersionPrefix>0.2.0</VersionPrefix>
-		<VersionSuffix>preprerelease</VersionSuffix>
+		<VersionSuffix>prerelease-alpha</VersionSuffix>
 		<Title>OTW Archive Helper</Title>
 		<Description>A helper library relying on web scraping that allows other C# programs to use content from otwarchive websites such as AO3.</Description>
 		<Authors>HydeZero</Authors>
 		<RepositoryUrl>https://github.com/HydeZero/OtwArchiveHelper</RepositoryUrl>
-		<PackageReleaseNotes>BREAKING CHANGE: Rename "FandomPage" functions to "CanonTag" functions. Please update the code.</PackageReleaseNotes>
+		<PackageReleaseNotes>Added GetTag backend that assumes canonicity</PackageReleaseNotes>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
     	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>

@@ -61,16 +61,26 @@ public class OtwArchiveHelper
             throw new ArgumentException("Tag name cannot be null or empty.");
         }
 
-        string url = $"{ArchivePath}tags/{Uri.EscapeDataString(tag)}/works?page={page}"; // construct the URL for the fandom page
-        Task<HttpResponseMessage> tagPageDownload = _archiveClient.GetAsync(url);
+        string url = $"{ArchivePath}tags/{Uri.EscapeDataString(tag)}/works?page={page}"; // construct the URL for the tag page
+        Task<HttpResponseMessage> tagPageWorksDownload = _archiveClient.GetAsync(url);
 
-        HttpResponseMessage response = await tagPageDownload;
+        string tagIdentifyUrl = $"{ArchivePath}tags/{Uri.EscapeDataString(tag)}?page={page}";
+
+        var tagPageDownload = _archiveClient.GetAsync(tagIdentifyUrl);
+
+        HttpResponseMessage responseWorks = await tagPageWorksDownload;
+
+        var responseTag = await tagPageDownload;
 
         Console.WriteLine("Downloaded");
 
-        if (!response.IsSuccessStatusCode)
+        if (!responseWorks.IsSuccessStatusCode)
         {
-            throw new Exception($"Failed to retrieve tag page: {response.ReasonPhrase}");
+            throw new Exception($"Failed to retrieve tag page: {responseWorks.ReasonPhrase}");
+        }
+        if (!responseTag.IsSuccessStatusCode)
+        {
+            throw new Exception($"Failed to retrieve tag page: {responseTag.ReasonPhrase}");
         }
 
         Console.WriteLine("Response is OK");
@@ -79,9 +89,9 @@ public class OtwArchiveHelper
 
         Console.WriteLine("Loading HTML");
 
-        tagPage.LoadHtml(await response.Content.ReadAsStringAsync());
+        tagPage.LoadHtml(await responseWorks.Content.ReadAsStringAsync());
 
-        Console.WriteLine("HTML Loaded, te");
+        Console.WriteLine("HTML Loaded");
 
         var workListNode = tagPage.DocumentNode.SelectSingleNode("/html"); // default to the html node
         Console.WriteLine("Selecting work list node");
@@ -108,7 +118,9 @@ public class OtwArchiveHelper
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error occured canonically.");
+                Console.WriteLine("Error occured canonically. Getting non-canonical");
+                tagPage = new HtmlDocument(); // resets tagpage
+                tagPage.LoadHtml(await responseTag.Content.ReadAsStringAsync());
                 Console.WriteLine(ex.Message);
                 workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@class='tag home profile']/div[@class='work listbox group']/ul[@class='index group']"); // non-canon tag
                 foreach (var work in workListNode.ChildNodes)
