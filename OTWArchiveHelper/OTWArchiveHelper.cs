@@ -66,48 +66,72 @@ public class OtwArchiveHelper
 
         HttpResponseMessage response = await tagPageDownload;
 
+        Console.WriteLine("Downloaded");
 
         if (!response.IsSuccessStatusCode)
         {
             throw new Exception($"Failed to retrieve tag page: {response.ReasonPhrase}");
         }
 
+        Console.WriteLine("Response is OK");
+
         var tagPage = new HtmlDocument();
+
+        Console.WriteLine("Loading HTML");
 
         tagPage.LoadHtml(await response.Content.ReadAsStringAsync());
 
-        var workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/ol[@class='work index group']"); 
+        Console.WriteLine("HTML Loaded, te");
+
+        var workListNode = tagPage.DocumentNode.SelectSingleNode("/html"); // default to the html node
+        Console.WriteLine("Selecting work list node");
         var Result = new List<Dictionary<string,List<string>>>();
 
         try
         {
-            workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/ol[@class='work index group']"); // canon tag
-            foreach (var work in workListNode.ChildNodes)
+            try
             {
-                var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
-                if (string.IsNullOrEmpty(title))
+                Console.WriteLine("Trying to find canonical tag page");
+                workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/ol[@class='work index group']"); // canon tag
+                Console.WriteLine("trying to get title");
+                foreach (var work in workListNode.ChildNodes)
                 {
-                    throw new Exception("Work title is empty. This means its probably non-canonical.");
+                    var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
+                    Console.WriteLine($"Checking work title: {title}");
+                    if (string.IsNullOrEmpty(title))
+                    {
+                        throw new Exception("Work title is empty. This means its probably non-canonical.");
+                    }
+                    break; // we only need to check the first work to see if the tag is canonical or not
                 }
-                break; // we only need to check the first work to see if the tag is canonical or not
+                Result = GetCanonTagPageBackend(tagPage); // get the canonical tag page
             }
-            Result = GetCanonTagPageBackend(tagPage); // get the canonical tag page
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error occured canonically.");
+                Console.WriteLine(ex.Message);
+                workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@class='tag home profile']/div[@class='work listbox group']/ul[@class='index group']"); // non-canon tag
+                foreach (var work in workListNode.ChildNodes)
+                {
+                    Console.WriteLine("Checking non-canonical work title");
+                    var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
+                    if (string.IsNullOrEmpty(title))
+                    {
+                        throw new Exception("This tag is neither canonical nor non-canonical.");
+                    }
+                    break;
+                }
+                Result = GetNonCanonTagPageBackend(tagPage); // get the non-canonical tag page
+            }
         }
-        catch (Exception)
+        catch (NullReferenceException ex)
         {
-            workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@class='tag home profile']/div[@class='work listbox group']/ul[@class='index group']"); // non-canon tag
-            foreach (var work in workListNode.ChildNodes)
-            {
-                var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
-                if (string.IsNullOrEmpty(title))
-                {
-                    throw new Exception("This tag is neither canonical nor non-canonical.");
-                }
-                break;
-            }
-            Result = GetNonCanonTagPageBackend(tagPage); // get the non-canonical tag page
+            throw new Exception($"No works found for this tag. The tag may not exist or the page structure has changed. {ex}");
         }
-
+        catch (Exception ex)
+        {
+            throw new Exception($"An error occurred while processing the tag page: {ex.Message}", ex);
+        }
         return Result; // return the result list of dictionaries with work information
     }
     
