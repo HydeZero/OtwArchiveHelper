@@ -53,14 +53,14 @@ public class OtwArchiveHelper
         return testResults; // if we get a response, the connection is successful
     }
     
-    private async Task<List<Dictionary<string,List<string>>>> GetFandomPageBackend(string fandomName, int page) // async list of dictionaries with work information
+    private async Task<List<Dictionary<string,List<string>>>> GetCanonTagPageBackend(string tag, int page) // async list of dictionaries with work information
     {
-        if (string.IsNullOrEmpty(fandomName))
+        if (string.IsNullOrEmpty(tag))
         {
             throw new ArgumentException("Fandom name cannot be null or empty.");
         }
         
-        string url = $"{ArchivePath}tags/{Uri.EscapeDataString(fandomName)}/works?page={page}"; // construct the URL for the fandom page
+        string url = $"{ArchivePath}tags/{Uri.EscapeDataString(tag)}/works?page={page}"; // construct the URL for the fandom page
         Task<HttpResponseMessage> fandomPageDownload = _archiveClient.GetAsync(url);
 
         HttpResponseMessage response = await fandomPageDownload;
@@ -173,15 +173,15 @@ public class OtwArchiveHelper
     }
     
     /// <summary>
-    /// Gets the fandom page as a list of dictionaries with List(string) key values. Good for additional processing/tag searches.
+    /// Gets the canonical tag page page as a list of dictionaries with List(string) key values. Good for additional processing/tag searches.
     /// </summary>
-    /// <param name="fandomName">The name of the fandom to search through.</param>
+    /// <param name="tag">The name of the tag to search through.</param>
     /// <param name="page">The page number to search through.</param>
     /// <returns>A dictionary of main tags/info of fanworks with the key values as lists.</returns>
-    /// <exception cref="ArgumentException">Fandom name cannot be null or empty.</exception>
-    public async Task<List<Dictionary<string, List<string>>>> GetFandomPageList(string fandomName, int page = 1)
+    /// <exception cref="ArgumentException">Tag name cannot be null or empty.</exception>
+    public async Task<List<Dictionary<string, List<string>>>> GetCanonTagPageList(string tag, int page = 1)
     {
-        if (string.IsNullOrEmpty(fandomName))
+        if (string.IsNullOrEmpty(tag))
         {
             throw new ArgumentException("Fandom name cannot be null or empty.");
         }
@@ -189,7 +189,7 @@ public class OtwArchiveHelper
                 
         try
         {
-            return await GetFandomPageBackend(fandomName, page);
+            return await GetCanonTagPageBackend(tag, page);
         }
         catch (Exception ex)
         {
@@ -198,21 +198,21 @@ public class OtwArchiveHelper
     }
     
     /// <summary>
-    /// Gets the fandom page as a list of dictionaries with string key values. Good for just displaying the info
+    /// Gets the canonical tag page as a list of dictionaries with string key values. Good for just displaying the info
     /// </summary>
-    /// <param name="fandomName">The name of the fandom to search through.</param>
+    /// <param name="tag">The name of the tag to search through.</param>
     /// <param name="page">The page number to search through.</param>
     /// <returns>A dictionary of main tags/info of fanworks with the key values as lists.</returns>
-    /// <exception cref="ArgumentException">Fandom name cannot be null or empty.</exception>
-    public async Task<List<Dictionary<string, string>>> GetFandomPageString(string fandomName, int page = 1)
+    /// <exception cref="ArgumentException">Tag name cannot be null or empty.</exception>
+    public async Task<List<Dictionary<string, string>>> GetCanonTagPageString(string tag, int page = 1)
     {
-        if (string.IsNullOrEmpty(fandomName))
+        if (string.IsNullOrEmpty(tag))
         {
             throw new ArgumentException("Fandom name cannot be null or empty.");
         }
         
                 
-        var preResult = await GetFandomPageBackend(fandomName, page);
+        var preResult = await GetCanonTagPageBackend(tag, page);
         
         var result = new List<Dictionary<string, string>>();
         

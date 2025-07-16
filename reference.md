@@ -1,18 +1,18 @@
 ﻿# Reference
 
-## Fandom Page Functions
+## Canonical Tag Page Functions
 
-### GetFandomPageList
+### GetCanonTagPageList
 Example Usage:
 ```csharp
-var fandomPage = OTWArchiveHelper.GetFandomPageList("Fandom Name", 1);
+var canonTagPage = OTWArchiveHelper.GetCanonTagPageList("Tag", 1);
 // Other code...
-works = await fandomPage; // call when the fandomPage is needed for processing.
+works = await canonTagPage; // call when the canonTagPage is needed for processing.
 ```
-Gets the fandom page as a list of dictionaries with List(string) key values. Good for additional processing/tag searches.
+Gets a canonical tag page as a list of dictionaries with List(string) key values. Good for additional processing/tag searches.
 
 Paramaters:
-- `fandomName` [string]: The name of the fandom to search through
+- `tag` [string]: The name of the tag to search through
 - `page` [int]: The page number to retrieve (integer starting at 1 and ending at page limit. Will throw an error if exceeding page limit)
 
 Returns:
@@ -48,12 +48,12 @@ List<string> tags = extractedData[indexOfWorkOnPage]["tags"];
 ```
 where `extractedData` is the list returned by the function, and `indexOfWorkOnPage` is the index of the work on the page (starting at 0). This code makes a list for each multi-value key, which can then be parsed as needed.
 
-### GetFandomPageString
+### GetCanonTagPageString
 Example Usage:
 ```csharp
-var fandomPageString = OTWArchiveHelper.GetFandomPageString("Fandom Name", 1);
+var canonTagPageString = OTWArchiveHelper.GetCanonTagPageString("Fandom Name", 1);
 // Other code...
-works = await fandomPageString; // call when fandomPageString is needed for display/processing.
+works = await canonTagPageString; // call when canonTagPageString is needed for display/processing.
 ```
 Gets the fandom page as a list of dictionaries with string key values. Good for just displaying the works for UI.
 
