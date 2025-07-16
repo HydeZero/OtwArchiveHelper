@@ -125,6 +125,10 @@ public class OtwArchiveHelper
                 workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@class='tag home profile']/div[@class='work listbox group']/ul[@class='index group']"); // non-canon tag
                 foreach (var work in workListNode.ChildNodes)
                 {
+                    if (work.Name == "#text")
+                    {
+                        continue;
+                    }
                     Console.WriteLine("Checking non-canonical work title");
                     string title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
                     if (string.IsNullOrEmpty(title))
@@ -248,7 +252,7 @@ public class OtwArchiveHelper
 
     private static List<Dictionary<string, List<string>>> GetNonCanonTagPageBackend(HtmlDocument tagPage) // async list of dictionaries with work information
     {
-        var workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/ol[@class='work index group']");
+        var workListNode = tagPage.DocumentNode.SelectSingleNode("/html/body/div[@id='outer']/div[@id='inner']/div[@id='main']/div[@class='tag home profile']/div[@class='work listbox group']/ul[@class='index group']");
 
         var result = new List<Dictionary<string, List<string>>>();
 
@@ -525,7 +529,7 @@ public class OtwArchiveHelper
         work["text"] = ConvertHtmlToMarkdown(work["text"]); // convert HTML to Markdown
         
         string markdown = $"# {work["title"]}\n\n" +
-                          $"**Authors:** {work["authors"]}\n\n" +
+                          $"**Author(s):** {work["authors"]}\n\n" +
                           $"## Summary\n{work["summary"]}\n\n" +
                           $"## Notes\n{work["notes"]}\n\n" +
                           $"{work["text"]}"; // this is the text of the work, which is in Markdown format
@@ -555,7 +559,7 @@ public class OtwArchiveHelper
                             $"</head>\n" +
                             $"<body>\n" +
                             $"<h1>{work["title"]}</h1>\n" +
-                            $"<p><strong>Authors:</strong> {work["authors"]}</p>\n" +
+                            $"<p><strong>Author(s):</strong> {work["authors"]}</p>\n" +
                             $"<h2>Summary</h2>\n" +
                             $"<p>{work["summary"]}</p>\n" +
                             $"<h2>Notes</h2>\n" +
