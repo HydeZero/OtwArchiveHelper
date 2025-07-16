@@ -1,4 +1,4 @@
-﻿namespace OTWArchiveHelper; // change this line to your namespace/namespace location
+﻿namespace OTWArchiveHelper; // change this line to your namespace/namespace location for manual installation
 using HtmlAgilityPack;
 
 

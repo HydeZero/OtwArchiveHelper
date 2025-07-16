@@ -1,12 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>OTWArchiveHelper</RootNamespace>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<VersionPrefix>0.1.0</VersionPrefix>
+		<VersionSuffix>prerelease</VersionSuffix>
+		<Title>OTW Archive Helper</Title>
+		<Description>A helper library relying on web scraping that allows other C# programs to use content from otwarchive websites such as AO3.</Description>
+		<Authors>HydeZero</Authors>
+		<RepositoryUrl>https://github.com/HydeZero/OtwArchiveHelper</RepositoryUrl>
+		<PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Program.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\README.md">
+        <Pack>True</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
