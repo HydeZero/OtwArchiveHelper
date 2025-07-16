@@ -96,7 +96,7 @@ public class OtwArchiveHelper
                 Console.WriteLine("trying to get title");
                 foreach (var work in workListNode.ChildNodes)
                 {
-                    var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
+                    var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a")?.InnerText.Trim() ?? "Error";
                     Console.WriteLine($"Checking work title: {title}");
                     if (string.IsNullOrEmpty(title))
                     {
@@ -114,7 +114,7 @@ public class OtwArchiveHelper
                 foreach (var work in workListNode.ChildNodes)
                 {
                     Console.WriteLine("Checking non-canonical work title");
-                    var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a").InnerText.Trim();
+                    var title = work.SelectSingleNode(".//div[@class='header module']/h4[@class='heading']/a")?.InnerText.Trim() ?? "error";
                     if (string.IsNullOrEmpty(title))
                     {
                         throw new Exception("This tag is neither canonical nor non-canonical.");

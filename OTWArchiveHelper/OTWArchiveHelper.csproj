@@ -8,7 +8,7 @@
         <RootNamespace>OTWArchiveHelper</RootNamespace>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<VersionPrefix>0.2.0</VersionPrefix>
-		<VersionSuffix>experimental</VersionSuffix>
+		<VersionSuffix>preprerelease</VersionSuffix>
 		<Title>OTW Archive Helper</Title>
 		<Description>A helper library relying on web scraping that allows other C# programs to use content from otwarchive websites such as AO3.</Description>
 		<Authors>HydeZero</Authors>
